@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Processing</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>GIRO Payment Processing</h1>
+
+    <form id="signupForm">
+        <label for="originatingAccountNo">Originating Account No:</label>
+        <input type="text" id="originatingAccountNo" name="originatingAccountNo"><br><br>
+
+        <label for="originatingAccountName">Originating Account Name:</label>
+        <input type="text" id="originatingAccountName" name="originatingAccountName"><br><br>
+
+        <label for="originatingBankBIC">Originating Bank BIC:</label>
+        <input type="text" id="originatingBankBIC" name="originatingBankBIC"><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="signupDetails"></div>
+
+    <form id="transactionForm" style="display: none;">
+        <label for="submit">Submit GIRO Signup:</label>
+        <input type="text" id="submit" name="submit"><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="transactionDetails"></div>
+
+    <script>
+        $(document).ready(function() {
+            $('#signupForm').on('submit', function(e) {
+                e.preventDefault();
+                const data = {
+                    OriginatingAccountNo: $('#originatingAccountNo').val(),
+                    OriginatingAccountName: $('#originatingAccountName').val(),
+                    OriginatingBankBIC: $('#originatingBankBIC').val()
+                };
+
+                $.post('/signup', data, function(response) {
+                    $('#signupDetails').html(`
+                        <h2>GIRO Signup Details</h2>
+                        <p>Receiving Account No: ${response.ReceivingAccountNo}</p>
+                        <p>Receiving Account Name: ${response.ReceivingAccountName}</p>
+                        <p>Originating Account No: ${data.OriginatingAccountNo}</p>
+                        <p>Originating Account Name: ${data.OriginatingAccountName}</p>
+                        <p>Originating Bank BIC: ${data.OriginatingBankBIC}</p>
+                        <p>Bill Reference No: ${response.BillReferenceNo}</p>
+                        <p>Ledger Balance: ${response.ledgerBalance}</p>
+                        <p>Subscription Amount: ${response.subscriptionAmount}</p>
+                        <p>Converted Amount: ${response.convertedAmount}</p>
+
+                        <button onclick="submitGIROSignup()">Submit GIRO Signup</button>
+                    `);
+                });
+            });
+
+            $('#transactionForm').on('submit', function(e) {
+                e.preventDefault();
+                $.post('/enquiry', { OriginatingAccountNo: $('#originatingAccountNo').val(), OriginatingBankBIC: $('#originatingBankBIC').val() }, function(response) {
+                    $('#transactionDetails').html(`
+                        <h2>GIRO Transaction Details</h2>
+                        <p>Receiving Account No: ${response.ReceivingAccountno}</p>
+                        <p>Receiving Account Name: ${response.ReceivingAccountName}</p>
+                        <p>Originating Account No: ${response.OriginatingAccountNo}</p>
+                        <p>Originating Account Name: ${response.OriginatingAccountName}</p>
+                        <p>Originating Bank BIC: ${response.OriginatingBankBIC}</p>
+                        <p>Bill Reference No: ${response.BillReferenceNo}</p>
+                        <p>Record Status: ${response.RecordStatus}</p>
+                    `);
+                });
+            });
+
+            function submitGIROSignup() {
+                $('#transactionForm').show();
+            }
+        });
+    </script>
+</body>
+</html>
